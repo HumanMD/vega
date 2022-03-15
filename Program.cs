@@ -1,9 +1,19 @@
+using Microsoft.EntityFrameworkCore;
+using vega.Persistence;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
-builder.Services.AddControllersWithViews();
+builder.Services.AddDbContext<VegaDbContext>(
+    options => options.UseSqlServer(
+        builder.Configuration.GetConnectionString("Default")
+    )
+);
 
+builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+
+builder.Services.AddControllers();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -13,15 +23,18 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
-app.UseHttpsRedirection();
+/* app.UseHttpsRedirection(); */
 app.UseStaticFiles();
 app.UseRouting();
-
-
-app.MapControllerRoute(
+app.UseEndpoints(endpoint =>
+{
+    endpoint.MapControllerRoute(
     name: "default",
     pattern: "{controller}/{action=Index}/{id?}");
 
-app.MapFallbackToFile("index.html");;
+});
+
+
+app.MapFallbackToFile("index.html");
 
 app.Run();
